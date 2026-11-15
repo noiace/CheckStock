@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, Boolean, ForeignKey, CheckConstraint, UniqueConstraint
+from sqlalchemy import ForeignKey, CheckConstraint, UniqueConstraint
 
 from .base import Base
 

@@ -24,7 +24,15 @@ if config.config_file_name is not None:
 import os
 
 from app.models.base import Base
-from app.models import product, warehouse, stock
+from app.models import (
+    product,
+    warehouse,
+    stock,
+    fbs_reservation,
+    fbo_shipment,
+    transfer,
+    stock_movement,
+)
 
 config.set_main_option(
     "sqlalchemy.url",

@@ -1,15 +1,34 @@
-from fastapi import APIRouter
-from pydantic import BaseModel
-from fastapi import Depends, HTTPException
+from fastapi import APIRouter, Depends, Path, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
-transfers_router = APIRouter()
+from app.db.database import get_db
+from app.schemas.transfers import TransferCreate, TransferRead
+from app.services import transfers as service
 
-@transfers_router.post("/transfers", tags=["transfers"], name="")
-async def CreateTransfer():
-    pass
+transfers_router = APIRouter(prefix="/transfers", tags=["transfers"])
 
-@transfers_router.post("/transfers/{id}/receive", tags=["transfers"], name="")
-async def TransferRecieveProduct():
-    pass
+
+@transfers_router.get("", response_model=list[TransferRead])
+async def list_transfers(in_transit_only: bool = False, session: AsyncSession = Depends(get_db)):
+    return await service.list_transfers(session, in_transit_only=in_transit_only)
+
+
+@transfers_router.get("/{id}", response_model=TransferRead)
+async def get_transfer(id: int = Path(gt=0), session: AsyncSession = Depends(get_db)):
+    return await service.get_transfer(session, id)
+
+
+@transfers_router.post("", response_model=TransferRead, status_code=status.HTTP_201_CREATED)
+async def create_transfer(data: TransferCreate, session: AsyncSession = Depends(get_db)):
+    async with session.begin():
+        transfer = await service.create_transfer(session, data)
+        response = TransferRead.model_validate(transfer)
+    return response
+
+
+@transfers_router.post("/{id}/receive", response_model=TransferRead)
+async def receive_transfer(id: int = Path(gt=0), session: AsyncSession = Depends(get_db)):
+    async with session.begin():
+        transfer = await service.receive_transfer(session, id)
+        response = TransferRead.model_validate(transfer)
+    return response

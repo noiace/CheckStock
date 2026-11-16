@@ -13,12 +13,13 @@ class StockRead(BaseModel):
     @computed_field
     @property
     def available_quantity(self) -> int:
-        # Доступно = физически на ФФ - зарезервировано под FBS.
         return self.physical_quantity - self.reserved_quantity
 
 
 class StockOverview(StockRead):
-    # Для экрана остатков сервис добавляет названия из Product и Warehouse.
+    # Строка Stock может отсутствовать: для экрана покажем 0, а id = null.
+    id: int | None = None
     sku: str
     product_name: str
     warehouse_name: str
+    warehouse_is_active: bool

@@ -1,11 +1,11 @@
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.fbo_shipment import FBOShipment, FBOShipmentStatus
-from app.models.fbs_reservation import FBSReservation, FBSReservationStatus
-from app.models.stock_movement import StockMovement, StockMovementType
-from app.models.transfer import Transfer, TransferStatus
-from app.schemas.movements import TransitItemRead
+from models.fbo_shipment import FBOShipment, FBOShipmentStatus
+from models.fbs_reservation import FBSReservation, FBSReservationStatus
+from models.stock_movement import StockMovement, StockMovementType
+from models.transfer import Transfer, TransferStatus
+from schemas.movements import TransitItemRead
 
 
 async def list_movements(

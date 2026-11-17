@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.database import get_db
-from app.models.stock_movement import StockMovementType
-from app.schemas.movements import StockMovementRead, TransitItemRead
-from app.services import movements as service
+from db.database import get_db
+from models.stock_movement import StockMovementType
+from schemas.movements import StockMovementRead, TransitItemRead
+from services import movements as service
 
 movements_router = APIRouter(tags=["movements"])
 

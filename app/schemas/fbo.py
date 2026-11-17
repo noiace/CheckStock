@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.fbo_shipment import FBOShipmentStatus
+from models.fbo_shipment import FBOShipmentStatus
 
 
 class FBOShipmentCreate(BaseModel):

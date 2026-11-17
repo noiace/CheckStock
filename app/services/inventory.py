@@ -3,11 +3,11 @@ from sqlalchemy import and_, select, true
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.product import Product
-from app.models.stock import Stock
-from app.models.stock_movement import StockMovement, StockMovementType
-from app.models.warehouse import Warehouse
-from app.schemas.stocks import StockOverview
+from models.product import Product
+from models.stock import Stock
+from models.stock_movement import StockMovement, StockMovementType
+from models.warehouse import Warehouse
+from schemas.stocks import StockOverview
 
 async def receive_stock(
     session: AsyncSession,

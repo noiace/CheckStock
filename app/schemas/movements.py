@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.stock_movement import StockMovementType
+from models.stock_movement import StockMovementType
 
 
 class StockMovementRead(BaseModel):

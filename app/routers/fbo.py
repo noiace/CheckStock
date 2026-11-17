@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, Path, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.database import get_db
-from app.schemas.fbo import FBOShipmentCreate, FBOShipmentRead
-from app.services import fbo as service
+from db.database import get_db
+from schemas.fbo import FBOShipmentCreate, FBOShipmentRead
+from services import fbo as service
 
 fbo_router = APIRouter(prefix="/fbo/shipments", tags=["fbo"])
 

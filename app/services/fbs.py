@@ -4,12 +4,12 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.fbs_reservation import FBSReservation, FBSReservationStatus
-from app.models.product import Product
-from app.models.stock import Stock
-from app.models.stock_movement import StockMovement, StockMovementType
-from app.models.warehouse import Warehouse
-from app.schemas.fbs import FBSReserveCreate
+from models.fbs_reservation import FBSReservation, FBSReservationStatus
+from models.product import Product
+from models.stock import Stock
+from models.stock_movement import StockMovement, StockMovementType
+from models.warehouse import Warehouse
+from schemas.fbs import FBSReserveCreate
 
 
 async def reserve_fbs(session: AsyncSession, data: FBSReserveCreate) -> FBSReservation:

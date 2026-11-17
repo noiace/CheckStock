@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.transfer import TransferStatus
+from models.transfer import TransferStatus
 
 
 class TransferCreate(BaseModel):

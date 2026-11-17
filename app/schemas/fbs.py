@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.fbs_reservation import FBSReservationStatus
+from models.fbs_reservation import FBSReservationStatus
 
 
 class FBSReserveCreate(BaseModel):

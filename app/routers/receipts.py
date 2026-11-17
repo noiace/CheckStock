@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.database import get_db
-from app.schemas.receipts import ReceiptCreate
-from app.schemas.stocks import StockRead
-from app.services.inventory import receive_stock
+from db.database import get_db
+from schemas.receipts import ReceiptCreate
+from schemas.stocks import StockRead
+from services.inventory import receive_stock
 
 receipts_router = APIRouter()
 

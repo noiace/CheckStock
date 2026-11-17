@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.database import get_db
-from app.schemas.stocks import StockOverview
-from app.services.inventory import list_stocks
+from db.database import get_db
+from schemas.stocks import StockOverview
+from services.inventory import list_stocks
 
 stocks_router = APIRouter()
 

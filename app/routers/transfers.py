@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, Path, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.database import get_db
-from app.schemas.transfers import TransferCreate, TransferRead
-from app.services import transfers as service
+from db.database import get_db
+from schemas.transfers import TransferCreate, TransferRead
+from services import transfers as service
 
 transfers_router = APIRouter(prefix="/transfers", tags=["transfers"])
 

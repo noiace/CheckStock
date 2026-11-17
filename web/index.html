@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6f8">
+  <title>CheckStock — складской учёт</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Главное меню">
+      <div class="brand"><div class="brand-mark">CS</div><div><strong>CheckStock</strong><span>Управление остатками</span></div></div>
+      <div class="nav-caption">РАБОЧЕЕ ПРОСТРАНСТВО</div>
+      <nav id="main-nav" class="nav-list" aria-label="Разделы">
+        <button class="nav-item active" data-view="overview" type="button"><span>Обзор</span><small>01</small></button>
+        <button class="nav-item" data-view="stocks" type="button"><span>Остатки</span><small>02</small></button>
+        <button class="nav-item" data-view="transit" type="button"><span>В пути</span><small>03</small></button>
+        <button class="nav-item" data-view="operations" type="button"><span>Операции</span><small>04</small></button>
+        <button class="nav-item" data-view="warehouses" type="button"><span>Склады</span><small>05</small></button>
+        <button class="nav-item" data-view="history" type="button"><span>История</span><small>06</small></button>
+      </nav>
+      <div class="sidebar-bottom"><div class="sidebar-note"><strong>О системе</strong><p>Учёт физических остатков, резервов FBS и товаров в пути.</p></div><div class="build-note">CheckStock / MVP</div></div>
+    </aside>
+
+    <div class="content-shell">
+      <header class="topbar">
+        <div class="topbar-location"><span class="muted">Рабочее пространство</span><span class="slash">/</span><span id="breadcrumb">Обзор</span></div>
+        <div class="topbar-actions">
+          <span id="connection-state" class="connection"><span class="state-dot"></span><span id="connection-text">Подключение...</span></span>
+          <a class="button button-quiet api-link" href="/docs" target="_blank" rel="noopener">API / Swagger</a>
+          <button class="button button-dark" id="refresh-btn" type="button">Обновить данные</button>
+        </div>
+      </header>
+
+      <main class="main">
+        <div id="global-error" class="global-error hidden" role="alert"></div>
+
+        <section data-panel="overview" class="view-panel">
+          <div class="page-heading"><div><div class="eyebrow">ОПЕРАЦИОННЫЙ ЦЕНТР</div><h1>Обзор склада</h1><p>Текущие остатки по фулфилментам, резервы и движение товаров.</p></div><button class="button button-outline" data-go="operations" type="button">Новая операция</button></div>
+          <div class="metric-grid">
+            <article class="metric-card"><div class="metric-label">Артикулов</div><div class="metric-value" id="metric-sku">—</div><div class="metric-foot">В товарном каталоге</div></article>
+            <article class="metric-card"><div class="metric-label">Физически на ФФ</div><div class="metric-value" id="metric-physical">—</div><div class="metric-foot">На всех складах</div></article>
+            <article class="metric-card"><div class="metric-label">Доступно</div><div class="metric-value" id="metric-available">—</div><div class="metric-foot">Без учёта резервов</div></article>
+            <article class="metric-card"><div class="metric-label">Резерв FBS</div><div class="metric-value" id="metric-reserved">—</div><div class="metric-foot">Физически на ФФ</div></article>
+            <article class="metric-card"><div class="metric-label">В пути</div><div class="metric-value" id="metric-transit">—</div><div class="metric-foot">По всем направлениям</div></article>
+          </div>
+          <div class="dashboard-grid">
+            <section class="surface dashboard-main"><div class="surface-head"><div><h2>Остатки по складам</h2><p>Физически, в резерве и доступно по каждому товару.</p></div><button class="text-button" data-go="stocks" type="button">Все остатки</button></div><div class="table-scroll"><table><thead><tr><th>Артикул / товар</th><th>Склад</th><th class="num">Физически</th><th class="num">Резерв</th><th class="num">Доступно</th></tr></thead><tbody id="overview-stock-rows"><tr><td colspan="5" class="empty-cell">Загрузка...</td></tr></tbody></table></div></section>
+            <section class="surface dashboard-aside"><div class="surface-head"><div><h2>Товары в пути</h2><p>По типам отправок</p></div></div><div class="transit-summary"><div class="summary-line"><div><span class="summary-tag">FF</span> Между складами</div><strong id="summary-transfer">—</strong></div><div class="summary-line"><div><span class="summary-tag">BO</span> На маркетплейс</div><strong id="summary-fbo">—</strong></div><div class="summary-line"><div><span class="summary-tag">BS</span> К покупателю</div><strong id="summary-fbs">—</strong></div></div><button class="button button-outline full" data-go="transit" type="button">Посмотреть отправки</button></section>
+          </div>
+          <section class="surface section-gap"><div class="surface-head"><div><h2>Последние операции</h2><p>Журнал обновляется после каждого действия.</p></div><button class="text-button" data-go="history" type="button">Открыть журнал</button></div><div class="table-scroll"><table><thead><tr><th>Дата и время</th><th>Операция</th><th>Товар</th><th>Откуда / куда</th><th class="num">Кол-во</th></tr></thead><tbody id="overview-history-rows"><tr><td colspan="5" class="empty-cell">Загрузка...</td></tr></tbody></table></div></section>
+        </section>
+
+        <section data-panel="stocks" class="view-panel hidden">
+          <div class="page-heading"><div><div class="eyebrow">СКЛАДСКОЙ УЧЁТ</div><h1>Остатки</h1><p>Количество товаров по каждому артикулу и складу.</p></div><button class="button button-dark" data-go="operations" type="button">Оформить приход</button></div>
+          <section class="surface"><div class="filters"><label class="field grow"><span>Поиск по артикулу или названию</span><input id="stocks-search" type="search" placeholder="Например, SKU-101"></label><label class="field"><span>Склад</span><select id="stocks-warehouse"><option value="">Все склады</option></select></label><label class="checkbox-field"><input id="stocks-show-archived" type="checkbox" checked> Показывать архивные</label></div><div class="table-scroll"><table><thead><tr><th>Артикул</th><th>Товар</th><th>Склад</th><th class="num">Физически</th><th class="num">Резерв</th><th class="num">Доступно</th><th>Состояние</th></tr></thead><tbody id="stocks-rows"><tr><td colspan="7" class="empty-cell">Загрузка...</td></tr></tbody></table></div><div class="table-footer" id="stocks-total">—</div></section>
+        </section>
+
+        <section data-panel="transit" class="view-panel hidden">
+          <div class="page-heading"><div><div class="eyebrow">ЛОГИСТИКА</div><h1>Товары в пути</h1><p>Незавершённые перемещения, FBO и доставки покупателям.</p></div></div>
+          <section class="surface"><div class="filters"><label class="field"><span>Тип отправки</span><select id="transit-filter"><option value="">Все направления</option><option value="TRANSFER">Между ФФ</option><option value="FBO">FBO — маркетплейс</option><option value="FBS">FBS — покупатель</option></select></label></div><div class="table-scroll"><table><thead><tr><th>Тип / №</th><th>Товар</th><th class="num">Кол-во</th><th>Откуда</th><th>Куда</th><th>Отправлено</th><th>Действие</th></tr></thead><tbody id="transit-rows"><tr><td colspan="7" class="empty-cell">Загрузка...</td></tr></tbody></table></div></section>
+        </section>
+
+        <section data-panel="operations" class="view-panel hidden">
+          <div class="page-heading"><div><div class="eyebrow">УПРАВЛЕНИЕ</div><h1>Операции с товарами</h1><p>Приход, резервирование и отгрузки. Все изменения проходят через API.</p></div></div>
+          <div id="operation-result" class="result-panel hidden" role="status" aria-live="polite"></div>
+          <div class="operation-grid">
+            <section class="surface form-card"><div class="surface-head"><div><h2>Добавить товар</h2><p>Новый артикул в каталоге</p></div></div><form id="form-product" class="stacked-form"><label class="field"><span>Артикул (SKU)</span><input name="sku" required maxlength="50" placeholder="SKU-104"></label><label class="field"><span>Название</span><input name="name" required maxlength="255" placeholder="Название товара"></label><button class="button button-dark" type="submit">Создать товар</button></form></section>
+            <section class="surface form-card"><div class="surface-head"><div><h2>Приход</h2><p>Добавить физический остаток</p></div></div><form id="form-receipt" class="stacked-form"><label class="field"><span>Товар</span><select name="product_id" data-products required></select></label><label class="field"><span>Склад</span><select name="warehouse_id" data-warehouses required></select></label><label class="field"><span>Количество</span><input name="quantity" type="number" min="1" step="1" value="1" required></label><button class="button button-dark" type="submit">Оформить приход</button></form></section>
+            <section class="surface form-card"><div class="surface-head"><div><h2>Резерв FBS</h2><p>Зарезервировать под заказ</p></div></div><form id="form-fbs" class="stacked-form"><label class="field"><span>Товар</span><select name="product_id" data-products required></select></label><label class="field"><span>Склад</span><select name="warehouse_id" data-warehouses required></select></label><label class="field"><span>Количество</span><input name="quantity" type="number" min="1" step="1" value="1" required></label><button class="button button-dark" type="submit">Создать резерв</button></form></section>
+            <section class="surface form-card"><div class="surface-head"><div><h2>Отправка FBO</h2><p>Со склада на маркетплейс</p></div></div><form id="form-fbo" class="stacked-form"><label class="field"><span>Товар</span><select name="product_id" data-products required></select></label><label class="field"><span>Склад отправления</span><select name="warehouse_id" data-warehouses required></select></label><label class="field"><span>Количество</span><input name="quantity" type="number" min="1" step="1" value="1" required></label><button class="button button-dark" type="submit">Отправить FBO</button></form></section>
+            <section class="surface form-card"><div class="surface-head"><div><h2>Перемещение между ФФ</h2><p>Товар сначала переходит в путь</p></div></div><form id="form-transfer" class="stacked-form"><label class="field"><span>Товар</span><select name="product_id" data-products required></select></label><div class="two-fields"><label class="field"><span>Откуда</span><select name="from_warehouse_id" data-warehouses required></select></label><label class="field"><span>Куда</span><select name="to_warehouse_id" data-warehouses required></select></label></div><label class="field"><span>Количество</span><input name="quantity" type="number" min="1" step="1" value="1" required></label><button class="button button-dark" type="submit">Создать перемещение</button></form></section>
+            <section class="surface form-card"><div class="surface-head"><div><h2>Завершить операцию</h2><p>Отмена, отправка или подтверждение</p></div></div><form id="form-action" class="stacked-form"><label class="field"><span>Тип действия</span><select name="action" required><option value="fbs-cancel">Отменить резерв FBS</option><option value="fbs-ship">Отправить FBS покупателю</option><option value="fbs-deliver">Подтвердить доставку FBS</option><option value="fbo-receive">Подтвердить приёмку FBO</option><option value="transfer-receive">Подтвердить перемещение</option></select></label><label class="field"><span>ID резерва / отправки / перемещения</span><input name="id" type="number" min="1" step="1" required placeholder="Например, 1"></label><p class="hint">ID возвращается после создания операции. Для отправлений в пути можно также использовать кнопки в разделе «В пути».</p><button class="button button-dark" type="submit">Выполнить действие</button></form></section>
+          </div>
+        </section>
+
+        <section data-panel="warehouses" class="view-panel hidden">
+          <div class="page-heading"><div><div class="eyebrow">СПРАВОЧНИК</div><h1>Склады ФФ</h1><p>Управление фулфилментами с сохранением остатков и истории.</p></div></div>
+          <div class="dashboard-grid warehouse-layout"><section class="surface dashboard-main"><div class="surface-head"><div><h2>Список складов</h2><p>Архивные склады остаются в учёте.</p></div></div><div class="table-scroll"><table><thead><tr><th>ID</th><th>Название</th><th>Статус</th><th>Действие</th></tr></thead><tbody id="warehouse-rows"><tr><td colspan="4" class="empty-cell">Загрузка...</td></tr></tbody></table></div></section><section class="surface dashboard-aside"><div class="surface-head"><div><h2>Новый склад</h2><p>Например, Север или Юг</p></div></div><form id="form-warehouse" class="stacked-form"><label class="field"><span>Название склада</span><input name="name" maxlength="255" required placeholder="Название"></label><button class="button button-dark full" type="submit">Добавить склад</button></form><div class="note-divider"></div><p class="hint">При архивировании склад не удаляется физически. Его история и остатки сохраняются.</p></section></div>
+        </section>
+
+        <section data-panel="history" class="view-panel hidden">
+          <div class="page-heading"><div><div class="eyebrow">АУДИТ</div><h1>История операций</h1><p>Все приходные, резервные и отгрузочные действия с датой и количеством.</p></div></div>
+          <section class="surface"><div class="filters"><label class="field"><span>Товар</span><select id="history-product"><option value="">Все товары</option></select></label><label class="field"><span>Склад</span><select id="history-warehouse"><option value="">Все склады</option></select></label><label class="field"><span>Тип операции</span><select id="history-type"><option value="">Все типы</option><option value="RECEIPT">Приход</option><option value="FBS_RESERVED">FBS: резерв</option><option value="FBS_CANCELLED">FBS: отмена</option><option value="FBS_SHIPPED">FBS: отправка</option><option value="FBS_DELIVERED">FBS: доставка</option><option value="FBO_SHIPPED">FBO: отправка</option><option value="FBO_RECEIVED">FBO: приёмка</option><option value="TRANSFER_SHIPPED">Перемещение: отправка</option><option value="TRANSFER_RECEIVED">Перемещение: приёмка</option></select></label><button class="button button-outline filter-button" id="history-filter-btn" type="button">Применить</button></div><div class="table-scroll"><table><thead><tr><th>Дата и время</th><th>Тип операции</th><th>Артикул</th><th>Откуда</th><th>Куда</th><th class="num">Кол-во</th><th>Связанный ID</th></tr></thead><tbody id="history-rows"><tr><td colspan="7" class="empty-cell">Загрузка...</td></tr></tbody></table></div><div class="table-footer"><span id="history-total">—</span><div class="pager"><button class="button button-quiet small" id="history-prev" type="button">Назад</button><span id="history-page">1</span><button class="button button-quiet small" id="history-next" type="button">Далее</button></div></div></section>
+        </section>
+        <footer class="page-footer"><span>CheckStock — складской учёт</span><span id="last-updated">Данные ещё не загружены</span></footer>
+      </main>
+    </div>
+  </div>
+  <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>

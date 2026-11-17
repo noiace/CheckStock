@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, Path, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.database import get_db
-from app.schemas.warehouses import WarehouseCreate, WarehouseRead, WarehouseRename
-from app.services import warehouses as service
+from db.database import get_db
+from schemas.warehouses import WarehouseCreate, WarehouseRead, WarehouseRename
+from services import warehouses as service
 
 warehouses_router = APIRouter(prefix="/warehouses", tags=["warehouses"])
 

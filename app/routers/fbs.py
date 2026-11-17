@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, Path, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.database import get_db
-from app.schemas.fbs import FBSReserveCreate, FBSReservationRead
-from app.services import fbs as service
+from db.database import get_db
+from schemas.fbs import FBSReserveCreate, FBSReservationRead
+from services import fbs as service
 
 fbs_router = APIRouter(prefix="/fbs/reservations", tags=["fbs"])
 

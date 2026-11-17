@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.warehouse import Warehouse
+from models.warehouse import Warehouse
 
 
 def _clean_name(name: str) -> str:

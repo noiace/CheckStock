@@ -4,12 +4,12 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.fbo_shipment import FBOShipment, FBOShipmentStatus
-from app.models.product import Product
-from app.models.stock import Stock
-from app.models.stock_movement import StockMovement, StockMovementType
-from app.models.warehouse import Warehouse
-from app.schemas.fbo import FBOShipmentCreate
+from models.fbo_shipment import FBOShipment, FBOShipmentStatus
+from models.product import Product
+from models.stock import Stock
+from models.stock_movement import StockMovement, StockMovementType
+from models.warehouse import Warehouse
+from schemas.fbo import FBOShipmentCreate
 
 
 async def ship_fbo(session: AsyncSession, data: FBOShipmentCreate) -> FBOShipment:

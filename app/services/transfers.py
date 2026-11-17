@@ -5,12 +5,12 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.product import Product
-from app.models.stock import Stock
-from app.models.stock_movement import StockMovement, StockMovementType
-from app.models.transfer import Transfer, TransferStatus
-from app.models.warehouse import Warehouse
-from app.schemas.transfers import TransferCreate
+from models.product import Product
+from models.stock import Stock
+from models.stock_movement import StockMovement, StockMovementType
+from models.transfer import Transfer, TransferStatus
+from models.warehouse import Warehouse
+from schemas.transfers import TransferCreate
 
 
 async def create_transfer(session: AsyncSession, data: TransferCreate) -> Transfer:

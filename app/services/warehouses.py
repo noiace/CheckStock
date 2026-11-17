@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.warehouse import Warehouse
@@ -29,6 +29,8 @@ async def get_warehouse(session: AsyncSession, warehouse_id: int) -> Warehouse:
 async def _ensure_unique_active_name(
     session: AsyncSession, name: str, exclude_id: int | None = None
 ) -> None:
+    # Serialize name checks and writes across both create and rename transactions.
+    await session.execute(text("SELECT pg_advisory_xact_lock(101104)"))
     query = select(Warehouse.id).where(
         Warehouse.is_active.is_(True), func.lower(Warehouse.name) == name.lower()
     )

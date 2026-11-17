@@ -1,0 +1,23 @@
+services:
+  postgres-test:
+    image: postgres:18.1
+    environment:
+      POSTGRES_USER: checkstock_test
+      POSTGRES_PASSWORD: test_only_password
+      POSTGRES_DB: checkstock_test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U checkstock_test -d checkstock_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+    tmpfs:
+      - /var/lib/postgresql
+
+  tests:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+asyncpg://checkstock_test:test_only_password@postgres-test:5432/checkstock_test
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    command: ["sh", "-c", "uv run --locked alembic upgrade head && uv run --locked alembic check && uv run --locked pytest -q"]

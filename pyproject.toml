@@ -1,7 +1,7 @@
 [project]
 name = "test-task"
 version = "0.1.0"
-description = "Add your description here"
+description = "Складской учёт для продавца маркетплейсов: остатки, FBS, FBO и перемещения"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
@@ -10,3 +10,16 @@ dependencies = [
     "fastapi[standard]>=0.163.0",
     "sqlalchemy[asyncio]>=2.1.8",
 ]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+pythonpath = ["app"]
+testpaths = ["tests"]

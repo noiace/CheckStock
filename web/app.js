@@ -7,7 +7,6 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const state = {
   view: 'overview', warehouses: [], products: [], stocks: [], transit: [],
   movements: [], historyEntries: [], historyPage: 0, pageSize: 50,
-  productApiAvailable: false,
 };
 const viewTitles = {
   overview: 'Обзор', stocks: 'Остатки', transit: 'В пути',
@@ -55,6 +54,12 @@ function productInfo(id) {
   const product = state.products.find(p => Number(p.id) === Number(id));
   return product || { id, sku: `ID ${id}`, name: 'Товар' };
 }
+function movementDestination(item) {
+  if (item.to_warehouse_id != null) return warehouseName(item.to_warehouse_id);
+  if (item.movement_type.startsWith('FBO_')) return 'Маркетплейс';
+  if (['FBS_SHIPPED', 'FBS_DELIVERED'].includes(item.movement_type)) return 'Покупатель';
+  return '—';
+}
 function getErrorMessage(data, status) {
   const detail = data?.detail;
   if (Array.isArray(detail)) return detail.map(item => {
@@ -99,32 +104,20 @@ function errorBanner(message) {
   element.classList.toggle('hidden', !message);
 }
 
-function uniqueProductsFromStocks(rows) {
-  const map = new Map();
-  for (const row of rows) {
-    if (!map.has(row.product_id)) map.set(row.product_id, {
-      id: row.product_id, sku: row.sku, name: row.product_name,
-    });
-  }
-  return [...map.values()];
-}
 async function refreshAll() {
   $('#refresh-btn').disabled = true;
   const paths = ['/warehouses', '/stocks', '/movements/in-transit', '/movements?limit=100', '/products'];
   const results = await Promise.allSettled(paths.map(path => api(path)));
-  const labels = ['склады', 'остатки', 'товары в пути', 'история'];
+  const labels = ['склады', 'остатки', 'товары в пути', 'история', 'товары'];
   const errors = [];
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < paths.length; i++) {
     if (results[i].status === 'rejected') errors.push(`${labels[i]}: ${results[i].reason.message}`);
   }
   state.warehouses = results[0].status === 'fulfilled' ? results[0].value : [];
   state.stocks = results[1].status === 'fulfilled' ? results[1].value : [];
   state.transit = results[2].status === 'fulfilled' ? results[2].value : [];
   state.movements = results[3].status === 'fulfilled' ? results[3].value : [];
-  state.productApiAvailable = results[4].status === 'fulfilled';
-  state.products = state.productApiAvailable ? results[4].value : uniqueProductsFromStocks(state.stocks);
-  // Если GET /products ещё не подключён, сохраняем рабочую страницу по данным /stocks.
-  if (state.products.length === 0 && state.stocks.length) state.products = uniqueProductsFromStocks(state.stocks);
+  state.products = results[4].status === 'fulfilled' ? results[4].value : [];
   showConnection(results[1].status === 'fulfilled' && results[0].status === 'fulfilled');
   errorBanner(errors.length ? `Часть данных не загрузилась. ${errors.join(' | ')}` : '');
   $('#last-updated').textContent = `Обновлено: ${formatDate(new Date().toISOString())}`;
@@ -177,7 +170,7 @@ function renderOverview() {
   const rows = state.stocks.filter(row => row.warehouse_is_active).slice(0, 8);
   tbody.innerHTML = rows.length ? rows.map(row => `<tr><td><strong>${safe(row.sku)}</strong><span class="subtext">${safe(row.product_name)}</span></td><td>${safe(row.warehouse_name)}</td><td class="num">${number(row.physical_quantity)}</td><td class="num">${number(row.reserved_quantity)}</td><td class="num"><strong>${number(row.available_quantity)}</strong></td></tr>`).join('') : emptyRow(5, 'Пока нет товаров и остатков');
   const history = state.movements.slice(0, 6);
-  $('#overview-history-rows').innerHTML = history.length ? history.map(item => `<tr><td class="no-wrap">${formatDate(item.created_at)}</td><td>${safe(movementNames[item.movement_type] || item.movement_type)}</td><td>${safe(productInfo(item.product_id).sku)}</td><td>${safe(warehouseName(item.from_warehouse_id))} / ${safe(warehouseName(item.to_warehouse_id))}</td><td class="num">${number(item.quantity)}</td></tr>`).join('') : emptyRow(5, 'История пока пуста');
+  $('#overview-history-rows').innerHTML = history.length ? history.map(item => `<tr><td class="no-wrap">${formatDate(item.created_at)}</td><td>${safe(movementNames[item.movement_type] || item.movement_type)}</td><td>${safe(productInfo(item.product_id).sku)}</td><td>${safe(warehouseName(item.from_warehouse_id))} / ${safe(movementDestination(item))}</td><td class="num">${number(item.quantity)}</td></tr>`).join('') : emptyRow(5, 'История пока пуста');
 }
 function renderStocks() {
   const search = $('#stocks-search').value.trim().toLocaleLowerCase('ru');
@@ -209,7 +202,7 @@ function associatedOperation(item) {
   return '—';
 }
 function renderHistoryRows(rows) {
-  $('#history-rows').innerHTML = rows.length ? rows.map(item => `<tr><td class="no-wrap">${formatDate(item.created_at)}</td><td><span class="status-chip transit">${safe(movementNames[item.movement_type] || item.movement_type)}</span></td><td><strong>${safe(productInfo(item.product_id).sku)}</strong></td><td>${safe(warehouseName(item.from_warehouse_id))}</td><td>${safe(warehouseName(item.to_warehouse_id))}</td><td class="num">${number(item.quantity)}</td><td class="no-wrap">${safe(associatedOperation(item))}</td></tr>`).join('') : emptyRow(7, 'По выбранным фильтрам операций нет');
+  $('#history-rows').innerHTML = rows.length ? rows.map(item => `<tr><td class="no-wrap">${formatDate(item.created_at)}</td><td><span class="status-chip transit">${safe(movementNames[item.movement_type] || item.movement_type)}</span></td><td><strong>${safe(productInfo(item.product_id).sku)}</strong></td><td>${safe(warehouseName(item.from_warehouse_id))}</td><td>${safe(movementDestination(item))}</td><td class="num">${number(item.quantity)}</td><td class="no-wrap">${safe(associatedOperation(item))}</td></tr>`).join('') : emptyRow(7, 'По выбранным фильтрам операций нет');
   $('#history-total').textContent = `Записей на странице: ${rows.length}`;
   $('#history-page').textContent = String(state.historyPage + 1);
   $('#history-prev').disabled = state.historyPage === 0;

@@ -5,6 +5,7 @@ from .fbs import fbs_router
 from .fbo import fbo_router
 from .transfers import transfers_router
 from .movements import movements_router
+from .products import products_router
 
 __all__ = [
     "warehouses_router",
@@ -14,4 +15,5 @@ __all__ = [
     "fbo_router",
     "transfers_router",
     "movements_router",
+    "products_router",
 ]
